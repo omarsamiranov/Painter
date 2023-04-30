@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 import cv2
+from time import time
 
 from PIL import Image
 
@@ -44,7 +45,10 @@ def run_one_image(img, tgt, model, device):
         seg_type = torch.zeros([valid.shape[0], 1])
     
     feat_ensemble = 0 if len(x) > 1 else -1
+    tic = time()
     _, y, mask = model(x.float().to(device), tgt.float().to(device), bool_masked_pos.to(device), valid.float().to(device), seg_type.to(device), feat_ensemble)
+    toc = time()
+    print(f"\nInference time: {toc-tic}")
     y = model.unpatchify(y)
     y = torch.einsum('nchw->nhwc', y).detach().cpu()
 
